@@ -2,7 +2,7 @@
 
 Easy way to use PyTest on your programming-2 exercise solutions.
 
-![Preview](./images/preview.png)
+![Preview](./images/preview.png).
 
 ## Run Tests
 Search for this icon ![Test Explorer Icon](./images/test_explorer_icon.png) and click on it.\
