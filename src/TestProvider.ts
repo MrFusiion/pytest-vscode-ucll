@@ -18,7 +18,6 @@ import {
 import * as path from "node:path";
 import { PyTestConfig } from "./PyTestConfig";
 import { PyTestFile } from "./PyTestFile";
-import { alignCenter } from "./utils/align";
 
 export class TestProvider {
     
