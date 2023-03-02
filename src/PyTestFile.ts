@@ -1,6 +1,6 @@
-import { Uri } from "vscode";
+import { Uri, workspace } from "vscode";
 import * as path from "path";
-import { exec } from "child_process";
+import { exec, ExecException } from "child_process";
 
 const FAILED_REGEX = /FAILED\s(.*)/;
 const ERROR_REGEX = /ERROR\s(.*)/;
@@ -33,8 +33,8 @@ export class PyTestFile {
             exec(`pytest ${this.path}`, {
                 cwd: this.folder
             }, (error, stdout, stderr) => {
-                // workspace.fs.writeFile(Uri.from({ scheme: "file", path: path.resolve(this.folder, "output.txt") }), Buffer.from(stdout));
-                resolve(this.parseResult(stdout));
+                resolve(this.parseResult(stdout, error));
+                //workspace.fs.writeFile(Uri.from({ scheme: "file", path: path.resolve(this.folder, "output.txt") }), Buffer.from(stdout));
             });
         });
     }
@@ -48,29 +48,32 @@ export class PyTestFile {
         }
     }
 
-    private parseResult(stdout: string): IPyTestResult {
-        if (stdout.match(FAILED_REGEX) || stdout.match(ERROR_REGEX)) {
+    private parseResult(stdout: string, error: ExecException | null): IPyTestResult {
+        const failed = error || !!stdout.match(FAILED_REGEX) || !!stdout.match(ERROR_REGEX);
+        const skipped = !!stdout.match(SKIPPED_REGEX)
+        const message = error?.message || stdout;
+        if (failed) {
             return {
                 status: "-",
-                message: this.parseSumary(stdout),
-                duration: this.parseResultTime(stdout)
+                message: this.parseSummary(message),
+                duration: this.parseResultTime(message)
             };
-        } else if (stdout.match(SKIPPED_REGEX)) {
+        } else if (skipped) {
             return {
                 status: "s",
-                message: this.parseSumary(stdout),
-                duration: this.parseResultTime(stdout)
+                message: this.parseSummary(message),
+                duration: this.parseResultTime(message)
             };
         } else {
             return {
                 status: "+",
                 message: "",
-                duration: this.parseResultTime(stdout)
+                duration: this.parseResultTime(message)
             };
         }
     }
 
-    private parseSumary(stdout: string): string {
+    private parseSummary(stdout: string): string {
         const match = stdout.match(SUMMARY_REGEX);
         if (match) {
             return [
@@ -79,7 +82,7 @@ export class PyTestFile {
                 "=".repeat(60)
             ].join("\n");
         }
-        return "";
+        return stdout;
     }
 
     public get studentFile(): Uri {
