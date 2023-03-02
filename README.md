@@ -17,3 +17,4 @@ Like this one ![Failed Test Error](/images/failed_test_error.png).
 ## TODO
 - [X] Display failed test output
 - [ ] Optimize
+- [X] Auto open asigment went student.py file opens.
