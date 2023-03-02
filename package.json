@@ -2,7 +2,7 @@
   "name": "pytest-vscode-ucll",
   "displayName": "pytest-vscode-ucll",
   "description": "Run pytest for programming-2",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "icon": "images/logo.png",
   "engines": {
     "vscode": "^1.75.0"
