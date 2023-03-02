@@ -1,10 +1,11 @@
 import {
 	ExtensionContext,
-	window
+	window,
+	workspace
 } from 'vscode';
 import * as path from "path";
 import { TestProvider } from './TestProvider';
-import { Assignment } from './Assignment';
+import { openAssignment } from './openAssignment';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -12,11 +13,10 @@ export function activate(context: ExtensionContext) {
 
 	console.log("Activated pytest-vscode-ucll extension!");
 
-	window.onDidChangeActiveTextEditor(editor => {
-		const fileName = editor?.document?.fileName;
+	workspace.onDidOpenTextDocument(textDocument => {
+		const fileName = textDocument?.fileName;
 		if (fileName?.endsWith("student.py")) {
-			const assignment = new Assignment(path.dirname(fileName));
-			assignment.open();
+			openAssignment(path.dirname(fileName));
 		}
 	});
 
