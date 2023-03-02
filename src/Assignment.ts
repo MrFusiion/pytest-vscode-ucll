@@ -1,6 +1,5 @@
-import { commands, Uri, ViewColumn, window, workspace } from "vscode";
+import { commands, Uri } from "vscode";
 import * as path from "path";
-import { WritableStreamDefaultController } from "stream/web";
 
 export class Assignment {
 
