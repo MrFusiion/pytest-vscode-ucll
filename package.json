@@ -1,6 +1,6 @@
 {
-  "name": "pytest-vscoce-ucll",
-  "displayName": "pytest-vscoce-ucll",
+  "name": "pytest-vscode-ucll",
+  "displayName": "pytest-vscode-ucll",
   "description": "Run pytest for programming-2",
   "version": "0.0.1",
   "engines": {
@@ -17,6 +17,7 @@
     "type": "git",
     "url": "https://github.com/MrFusiion/pytest-vscoce-ucll.git"
   },
+  "publisher": "MrFusiion",
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "compile": "tsc -p ./",
