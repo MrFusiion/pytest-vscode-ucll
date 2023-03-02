@@ -11,11 +11,9 @@ import {
     WorkspaceFolder,
     RelativePattern,
     Uri,
-    TestMessage,
     TestRun,
     Location,
     Position,
-    Range,
 } from "vscode";
 import * as path from "node:path";
 import { PyTestConfig } from "./PyTestConfig";
