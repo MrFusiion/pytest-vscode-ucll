@@ -1,4 +1,4 @@
-# PyTest For UCLL [Programming-2 exercise](https://github.com/UCLL-PR2/exercises)
+# PyTest For UCLL [Programming-2 exercises](https://github.com/UCLL-PR2/exercises)
 
 Easy way to use PyTest on your programming-2 exercise solutions.
 
