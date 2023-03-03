@@ -1,14 +1,9 @@
-import { Uri, workspace } from "vscode";
+import { Uri } from "vscode";
 import * as path from "path";
-import { exec, ExecException } from "child_process";
+import { Shell } from "./Shell";
+import { PyTestSummary } from "./PyTestSummary";
 
-const FAILED_REGEX = /FAILED\s(.*)/;
-const ERROR_REGEX = /ERROR\s(.*)/;
-const SKIPPED_REGEX = /SKIPPED\s(.*)/;
-const TIME_REGEX = /\d+\s[\w]+\sin\s(\d+\.\d+)s/;
-const SUMMARY_REGEX = /[=]+\s[\w ]+\s[=]+.(.+)/s;
-
-type PyTestStatus = "+" | "-" | "s";
+type PyTestStatus = "passed" | "failed";
 
 interface IPyTestResult {
     readonly status: PyTestStatus;
@@ -29,60 +24,41 @@ export class PyTestFile {
     }
 
     public async run(shouldDebug: boolean): Promise<IPyTestResult> {
-        return new Promise((resolve, reject) => {
-            exec(`pytest ${this.path}`, {
-                cwd: this.folder
-            }, (error, stdout, stderr) => {
-                resolve(this.parseResult(stdout, error));
-                //workspace.fs.writeFile(Uri.from({ scheme: "file", path: path.resolve(this.folder, "output.txt") }), Buffer.from(stdout));
-            });
-        });
-    }
-
-    private parseResultTime(stdout: string): number | undefined {
-        const match = stdout.match(TIME_REGEX);
-        if (match) {
-            return parseFloat(match[1]) * 1000;
-        } else {
-            return undefined;
+        const shell = new Shell("pytest", this.folder);
+        try {
+            const result = await shell.result();
+            return this.parseResult(result.stdout);
+        }
+        catch (error: any) {
+            return {
+                status: "failed",
+                message: error.message
+            }
         }
     }
 
-    private parseResult(stdout: string, error: ExecException | null): IPyTestResult {
-        const failed = error || !!stdout.match(FAILED_REGEX) || !!stdout.match(ERROR_REGEX);
-        const skipped = !!stdout.match(SKIPPED_REGEX)
-        const message = error?.message || stdout;
-        if (failed) {
+    private parseResult(stdout: string): IPyTestResult {
+        
+        const summary = new PyTestSummary(stdout);
+
+        if (summary.didFail) {
             return {
-                status: "-",
-                message: this.parseSummary(message),
-                duration: this.parseResultTime(message)
+                status: "failed",
+                message: summary.text,
+                duration: summary.time
             };
-        } else if (skipped) {
+        } else if (summary.didPass) {
             return {
-                status: "s",
-                message: this.parseSummary(message),
-                duration: this.parseResultTime(message)
+                status: "passed",
+                message: summary.text,
+                duration: summary.time
             };
         } else {
             return {
-                status: "+",
-                message: "",
-                duration: this.parseResultTime(message)
+                status: "failed",
+                message: "Unknown error notify the developer of the extension."
             };
         }
-    }
-
-    private parseSummary(stdout: string): string {
-        const match = stdout.match(SUMMARY_REGEX);
-        if (match) {
-            return [
-                "=".repeat(60),
-                match[1],
-                "=".repeat(60)
-            ].join("\n");
-        }
-        return stdout;
     }
 
     public get studentFile(): Uri {

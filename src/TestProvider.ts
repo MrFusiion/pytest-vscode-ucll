@@ -14,6 +14,7 @@ import {
     TestRun,
     Location,
     Position,
+    Range,
 } from "vscode";
 import * as path from "node:path";
 import { PyTestConfig } from "./PyTestConfig";
@@ -112,6 +113,7 @@ export class TestProvider {
             }
 
             const item = controller.createTestItem(path, path, isNextFile ? uri : undefined);
+            item.range = isNextFile ? new Range(new Position(0, 0), new Position(0, 0)) : undefined;
 
             testItem.children.add(item);
 
@@ -156,12 +158,15 @@ export class TestProvider {
 
             switch (this.getType(test)) {
                 case "folder":
-                    test.children.forEach(push);
+                    Array.from(test.children)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .reverse()
+                        .forEach(([_, test]) => queue.push(test));
                     break;
                 case "file":
                     // promises.push(this.runTest(test, run, shouldDebug));
                     await this.runTest(test, run, shouldDebug);
-                    break; 
+                    break;
                 case "unknown":
                     throw new Error("Unexpected Error: TestItem has no uri");
             }
@@ -177,34 +182,19 @@ export class TestProvider {
         const file = new PyTestFile(test.uri!);
         run.started(test);
 
-        const result = await file.run(shouldDebug)
+        const result = await file.run(shouldDebug);
+        const location = new Location(file.studentFile, new Position(0, 0));
+        run.appendOutput(result.message, location, test);
+
         switch (result.status) {
-            case "+":
+            case "passed":
                 run.passed(test, result.duration);
                 break;
-            case "-":
-            case "s":
-                const location = new Location(file.studentFile, new Position(0, 0));
-
-                // run.appendOutput(this.parseMessage(test, result.message), location, test);
-                run.appendOutput(result.message, location, test);
+            case "failed":
                 run.failed(test, [], result.duration);
-                // run.skipped(test);
                 break;
         }
     }
-
-    // private parseMessage(item: TestItem, message: string): string {
-    //     const width = 80;
-    //     return [
-    //         // "=".repeat(width),
-    //         // alignCenter(` ${item.label} `, width, "="),
-    //         message,
-    //         "=".repeat(width),
-    //         "\n"
-    //     ].join("\n");
-    //     return message;
-    // }
 
     public getRunProfile(): TestRunProfile {
         return this.runProfile;
