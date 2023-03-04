@@ -1,3 +1,5 @@
+import { Configuration } from "./Configuration";
+
 const PASSED_REGEX = /(\d+) passed/;
 const SKIPPED_REGEX = /(\d+) skipped/;
 const FAILED_REGEX = /(\d+) failed/;
@@ -5,7 +7,7 @@ const ERROR_REGEX = /(\d+) error/;
 const TIME_REGEX = /(\d+\.\d+)s/;
 const SUMMARY_REGEX = /=+\sshort test summary info\s=+/;
 
-export class PyTestSummary {
+export class PyTestResult {
 
     private _text: string;
     private _time: number;
@@ -19,10 +21,12 @@ export class PyTestSummary {
 
         let lines = stdout.split("\n");
 
-        while (lines.length > 0) {
-            const line = lines.shift() || "";
-            if (line.match(SUMMARY_REGEX)) {
-                break;
+        if (Configuration.getValue("vscode.pytest.ucll.showOnlyResultSummary")) {
+            while (lines.length > 0) {
+                const line = lines.shift() || "";
+                if (line.match(SUMMARY_REGEX)) {
+                    break;
+                }
             }
         }
 

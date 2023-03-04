@@ -1,7 +1,7 @@
 import { Uri } from "vscode";
 import * as path from "path";
 import { Shell } from "./Shell";
-import { PyTestSummary } from "./PyTestSummary";
+import { PyTestResult } from "./PyTestResult";
 
 type PyTestStatus = "passed" | "failed";
 
@@ -35,19 +35,19 @@ export class PyTestFile {
 
     private parseResult(stdout: string): IPyTestResult {
         
-        const summary = new PyTestSummary(stdout);
+        const result = new PyTestResult(stdout);
 
-        if (summary.didFail) {
+        if (result.didFail) {
             return {
                 status: "failed",
-                message: summary.text,
-                duration: summary.time
+                message: result.text,
+                duration: result.time
             };
-        } else if (summary.didPass) {
+        } else if (result.didPass) {
             return {
                 status: "passed",
-                message: summary.text,
-                duration: summary.time
+                message: result.text,
+                duration: result.time
             };
         } else {
             return {

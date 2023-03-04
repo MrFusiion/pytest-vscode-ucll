@@ -24,6 +24,11 @@
             "type": "boolean",
             "default": true,
             "description": "Automatically open assignments when opening a student.py file."
+          },
+          "vscode.pytest.ucll.showOnlyResultSummary": {
+            "type": "boolean",
+            "default": false,
+            "description": "Show only the test result summary in the test output window."
           }
         }
       }
