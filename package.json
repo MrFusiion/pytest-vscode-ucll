@@ -28,7 +28,9 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
+    "@types/ini": "^1.3.31",
     "@types/glob": "^8.1.0",
+    "@types/markdown-it": "^12.2.3",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
     "@types/vscode": "^1.75.0",
@@ -41,8 +43,9 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@types/ini": "^1.3.31",
-    "ini": "^3.0.1"
+    "highlight.js": "^11.7.0",
+    "ini": "^3.0.1",
+    "markdown-it": "^13.0.1"
   },
   "license": "MIT"
 }
