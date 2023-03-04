@@ -14,10 +14,14 @@ Press on any failed test ![Failed Test](/images/failed_test.png).\
 And It should open you stutend.py file and show a error.\
 Like this one ![Failed Test Error](/images/failed_test_error.png).
 
+## Assignments
+Opening a `student.py` file should automatically open the assignment.md file in the second window column in preview mode. You can change this behavior in your vscode settings under `UCLL Programming 2` section.\
+![Assignment Setting](./images/settings.png)
+
 ## TODO
 - [X] Display failed test output
 - [X] Optimize
 - [X] Auto open assigment went student.py file opens.
-- [ ] Add Configuration settings.
+- [X] Add Configuration settings.
 - [ ] Show error on tested files.
 - [ ] Add OnDidDelete listener for TestProvider.

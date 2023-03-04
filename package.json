@@ -13,10 +13,26 @@
   "activationEvents": [
     "workspaceContains:pytest.ini"
   ],
+  "contributes": {
+    "configuration": [
+      {
+        "id": "pytest-vscode-ucll",
+        "title": "UCLL Programming 2 PyTest",
+        "order": 0,
+        "properties": {
+          "main.autoOpenAssignments": {
+            "type": "boolean",
+            "default": true,
+            "description": "Automatically open assignments when opening a student.py file."
+          }
+        }
+      }
+    ]
+  },
   "main": "./out/extension.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MrFusiion/pytest-vscoce-ucll.git"
+    "url": "https://github.com/MrFusiion/pytest-vscode-ucll.git"
   },
   "publisher": "MrFusiion",
   "scripts": {

@@ -5,6 +5,7 @@ import {
 import * as path from "path";
 import { TestProvider } from './TestProvider';
 import { AssignmentManager } from './AssignmentManager';
+import { Configuration } from './Configuration';
 
 export function activate(context: ExtensionContext) {
 
@@ -20,6 +21,10 @@ export function activate(context: ExtensionContext) {
 
 		const fileName = document.fileName;
 		if (fileName.endsWith("student.py")) {
+			console.log(Configuration.getValue<boolean>("main.autoOpenAssignments"));
+			if (!Configuration.getValue<boolean>("main.autoOpenAssignments")) {
+				return;
+			}
 			assignmentManager.open(path.dirname(fileName));
 		}
 	});

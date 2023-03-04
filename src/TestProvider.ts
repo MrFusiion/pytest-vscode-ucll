@@ -14,7 +14,7 @@ import {
     TestRun,
     Location,
     Position,
-    Range,
+    Range
 } from "vscode";
 import * as path from "node:path";
 import { PyTestConfig } from "./PyTestConfig";
