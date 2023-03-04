@@ -8,6 +8,7 @@ export interface IMarkdownPreviewPanelOptions {
     readonly name?: string;
     readonly viewColumn?: ViewColumn;
     readonly preserveFocus?: boolean;
+    readonly iconPath?: Uri | { light: Uri; dark: Uri };
 }
 
 export class MarkdownPreviewPanel extends Disposable {
@@ -34,6 +35,8 @@ export class MarkdownPreviewPanel extends Disposable {
                 localResourceRoots: contrubtionProvider.contributions.previewResourceRoots,
             }
         ));
+        
+        this.panel.iconPath = options.iconPath;
     }
 
     public async render() {

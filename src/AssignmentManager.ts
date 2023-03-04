@@ -1,4 +1,4 @@
-import { ExtensionContext, RelativePattern, workspace } from "vscode";
+import { ExtensionContext, RelativePattern, workspace, Uri } from "vscode";
 import * as path from "path";
 import { Disposable } from "./util/Disposable";
 import { MarkdownPreviewManager } from "./markdown/MarkdownPreviewManager";
@@ -13,9 +13,11 @@ const ASSIGMENT_NAMES = [
 export class AssignmentManager extends Disposable {
 
     private _markdownPreviewManager: MarkdownPreviewManager;
+    private _context: ExtensionContext;
 
     constructor(context: ExtensionContext) {
         super();
+        this._context = context;
         this._markdownPreviewManager = this._register(new MarkdownPreviewManager(context));
     }
 
@@ -26,6 +28,7 @@ export class AssignmentManager extends Disposable {
             if (files.length > 0) {
                 return this._register(this._markdownPreviewManager.getMarkdownPanel(files[0], {
                     name: `Assignment: ${path.basename(folder)}`,
+                    iconPath: Uri.file(path.join(this._context.extensionPath, "images", "logo.png")),
                     ...options
                 }));
             }
