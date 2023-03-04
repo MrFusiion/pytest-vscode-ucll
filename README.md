@@ -19,7 +19,7 @@ When you open a `student.py` file, the assignment.md file should open automatica
 
 ## `Run Tests`
 
-Search for this icon ![Test Explorer Icon](./images/test_explorer_icon.png) and click on it.\
+### Search for this icon ![Test Explorer Icon](./images/test_explorer_sidebar_icon.png) in the sidebar and click on it to open the `Test Explorer`.
 ### Test a folder by pressing on a parent TestItem.
 ![TestItem Folder](./images/test_folder.png)
 ### Test a single item by pressing on a TestItem without children.
