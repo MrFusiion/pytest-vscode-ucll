@@ -16,7 +16,10 @@ export class AssignmentManager extends Disposable {
     public async open(folder: string, options?: IMarkdownPreviewPanelOptions): Promise<MarkdownPreviewPanel> {
         return this._markdownPreviewManager.getMarkdownPanel(
             Uri.file(path.join(folder, "assignment.md")),
-            options
+            {
+                name: `Assignment: ${path.basename(folder)}`,
+                ...options
+            }
         );
     }
 }

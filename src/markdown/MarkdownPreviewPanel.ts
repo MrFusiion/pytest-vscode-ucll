@@ -5,6 +5,7 @@ import { MarkdownContributionProvider } from "./MarkdownContributionProvider";
 import * as path from "path";
 
 export interface IMarkdownPreviewPanelOptions {
+    readonly name?: string;
     readonly viewColumn?: ViewColumn;
     readonly preserveFocus?: boolean;
 }
@@ -22,7 +23,7 @@ export class MarkdownPreviewPanel extends Disposable {
         super();
         this.panel = this._register(window.createWebviewPanel(
             `markdown-preview-${resource}`,
-            `Markdown Preview ${path.dirname(resource.fsPath)}`,
+            options.name || `Markdown Preview ${resource.fsPath}`,
             {
                 viewColumn: options.viewColumn || ViewColumn.Two,
                 preserveFocus: options.preserveFocus !== undefined
