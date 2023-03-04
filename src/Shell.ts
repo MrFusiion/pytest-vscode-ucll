@@ -8,15 +8,15 @@ export interface IShellResult {
 
 export class Shell {
 
-    private process: ChildProcessWithoutNullStreams;
+    private _process: ChildProcessWithoutNullStreams;
 
     constructor(cmd: string, cwd?: string) {
-        this.process = spawn(cmd, {
+        this._process = spawn(cmd, {
             shell: false,
             cwd
         });
-        this.process.stdout.setEncoding("utf8");
-        this.process.stderr.setEncoding("utf8");
+        this._process.stdout.setEncoding("utf8");
+        this._process.stderr.setEncoding("utf8");
     }
 
     
@@ -25,15 +25,15 @@ export class Shell {
             const stdout: string[] = [];
             const stderr: string[] = [];
 
-            this.process.stdout.on("data", (data) => {
+            this._process.stdout.on("data", (data) => {
                 stdout.push(data.toString());
             });
 
-            this.process.stderr.on("data", (data) => {
+            this._process.stderr.on("data", (data) => {
                 stderr.push(data.toString());
             });
 
-            this.process.on("close", (code) => {
+            this._process.on("close", (code) => {
                 resolve({
                     stdout: stdout.join(""),
                     stderr: stderr.join(""),
@@ -41,7 +41,7 @@ export class Shell {
                 });
             });
 
-            this.process.on("error", (error) => {
+            this._process.on("error", (error) => {
                 reject(error);
             });
         });
