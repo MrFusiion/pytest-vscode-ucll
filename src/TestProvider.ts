@@ -182,7 +182,7 @@ export class TestProvider {
         run.started(test);
 
         const result = await file.run(shouldDebug);
-        const location = new Location(file.studentFile, new Position(0, 0));
+        const location = new Location(test.uri!, new Position(0, 0));
         run.appendOutput(result.message, location, test);
 
         switch (result.status) {
