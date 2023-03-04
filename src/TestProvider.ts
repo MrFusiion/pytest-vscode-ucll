@@ -161,7 +161,7 @@ export class TestProvider {
                     Array.from(test.children)
                         .sort(([a], [b]) => a.localeCompare(b))
                         .reverse()
-                        .forEach(([_, test]) => queue.push(test));
+                        .forEach(([_, test]) => push(test));
                     break;
                 case "file":
                     await this.runTest(test, run, shouldDebug);
