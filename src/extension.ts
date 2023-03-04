@@ -21,8 +21,7 @@ export function activate(context: ExtensionContext) {
 
 		const fileName = document.fileName;
 		if (fileName.endsWith("student.py")) {
-			console.log(Configuration.getValue<boolean>("main.autoOpenAssignments"));
-			if (!Configuration.getValue<boolean>("main.autoOpenAssignments")) {
+			if (!Configuration.getValue<boolean>("vscode.pytest.ucll.autoOpenAssignments")) {
 				return;
 			}
 			assignmentManager.open(path.dirname(fileName));

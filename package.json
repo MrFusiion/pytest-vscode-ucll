@@ -20,7 +20,7 @@
         "title": "UCLL Programming 2 PyTest",
         "order": 0,
         "properties": {
-          "main.autoOpenAssignments": {
+          "vscode.pytest.ucll.autoOpenAssignments": {
             "type": "boolean",
             "default": true,
             "description": "Automatically open assignments when opening a student.py file."
