@@ -20,3 +20,4 @@ Like this one ![Failed Test Error](/images/failed_test_error.png).
 - [X] Auto open assigment went student.py file opens.
 - [ ] Add Configuration settings.
 - [ ] Show error on tested files.
+- [ ] Add OnDidDelete listener for TestProvider.
