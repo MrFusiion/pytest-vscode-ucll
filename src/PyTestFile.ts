@@ -13,18 +13,14 @@ interface IPyTestResult {
 
 export class PyTestFile {
 
-    private readonly path: string;
-    private readonly folder: string;
-    private readonly file: string;
+    private readonly _folder: string;
 
     constructor(uri: Uri) {
-        this.path = uri.fsPath;
-        this.folder = path.dirname(uri.fsPath);
-        this.file = path.basename(uri.fsPath);
+        this._folder = path.dirname(uri.fsPath);
     }
 
     public async run(shouldDebug: boolean): Promise<IPyTestResult> {
-        const shell = new Shell("pytest", this.folder);
+        const shell = new Shell("pytest", this._folder);
         try {
             const result = await shell.result();
             return this.parseResult(result.stdout);
@@ -64,7 +60,7 @@ export class PyTestFile {
     public get studentFile(): Uri {
         return Uri.from({
             scheme: "file",
-            path: path.resolve(this.folder, "student.py")
+            path: path.resolve(this._folder, "student.py")
         });
     }
 

@@ -22,25 +22,25 @@ import { PyTestFile } from "./PyTestFile";
 
 export class TestProvider {
     
-    private controller: TestController;
-    private watchers: FileSystemWatcher[] = [];
-    private runProfile: TestRunProfile;
-    private debugProfile: TestRunProfile;
+    private _controller: TestController;
+    private _watchers: FileSystemWatcher[] = [];
+    private _runProfile: TestRunProfile;
+    private _debugProfile: TestRunProfile;
 
     public constructor() {
-        this.controller = tests.createTestController("pytest-vscode-ucll", "PyTest Programming-2");
+        this._controller = tests.createTestController("pytest-vscode-ucll", "PyTest Programming-2");
 
-        this.controller.resolveHandler = async test => {
+        this._controller.resolveHandler = async test => {
             if (!test) {
                 await this.discoverWorkspaceFolders();
             }
         };
 
-        this.runProfile = this.controller.createRunProfile("Run", TestRunProfileKind.Run, async (request, token) => {
+        this._runProfile = this._controller.createRunProfile("Run", TestRunProfileKind.Run, async (request, token) => {
             await this.runTests(false, request, token);
         });
 
-        this.debugProfile = this.controller.createRunProfile("Debug", TestRunProfileKind.Debug, async (request, token) => {
+        this._debugProfile = this._controller.createRunProfile("Debug", TestRunProfileKind.Debug, async (request, token) => {
             await this.runTests(true, request, token);
         });
     }
@@ -53,9 +53,9 @@ export class TestProvider {
         await Promise.all(
             workspace.workspaceFolders.map(async folder => {
 
-                const item = this.controller.createTestItem(folder.name, folder.name, folder.uri);
+                const item = this._controller.createTestItem(folder.name, folder.name, folder.uri);
 
-                this.controller.items.add(item);
+                this._controller.items.add(item);
 
                 this.discoverWorkspaceFolderFiles(folder, item);
             }
@@ -80,7 +80,7 @@ export class TestProvider {
             this.getOrCreateTestItem(uri, item);
         }
 
-        this.watchers.push(watcher);
+        this._watchers.push(watcher);
     }
 
     private async getOrCreateTestItem(uri: Uri, testItem: TestItem): Promise<TestItem> {
@@ -89,7 +89,7 @@ export class TestProvider {
             throw new Error("Unexpected Error: TestItem has no uri");
         }
 
-        const controller = this.controller;
+        const controller = this._controller;
 
         const relPath = path.relative(testItem.uri.fsPath, uri.fsPath);
 
@@ -134,7 +134,7 @@ export class TestProvider {
 
     private async runTests(shouldDebug: boolean, request: TestRunRequest, token: CancellationToken): Promise<void> {
 
-        const run = this.controller.createTestRun(request);
+        const run = this._controller.createTestRun(request);
         const queue: TestItem[] = []
         const promises: Promise<void>[] = [];
 
@@ -146,7 +146,7 @@ export class TestProvider {
         if (request.include) {
             request.include.forEach(push);
         } else {
-            this.controller.items.forEach(push);
+            this._controller.items.forEach(push);
         }
 
         while (queue.length > 0 && !token.isCancellationRequested) {
@@ -164,7 +164,6 @@ export class TestProvider {
                         .forEach(([_, test]) => queue.push(test));
                     break;
                 case "file":
-                    // promises.push(this.runTest(test, run, shouldDebug));
                     await this.runTest(test, run, shouldDebug);
                     break;
                 case "unknown":
@@ -197,15 +196,15 @@ export class TestProvider {
     }
 
     public getRunProfile(): TestRunProfile {
-        return this.runProfile;
+        return this._runProfile;
     }
 
     public getDebugProfile(): TestRunProfile {
-        return this.debugProfile;
+        return this._debugProfile;
     }
 
     public dispose(): void {
-        this.controller.dispose();
-        this.watchers.forEach(watcher => watcher.dispose());
+        this._controller.dispose();
+        this._watchers.forEach(watcher => watcher.dispose());
     }
 }
