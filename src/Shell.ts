@@ -13,23 +13,22 @@ export class Shell {
     constructor(cmd: string, cwd?: string) {
         this._process = spawn(cmd, {
             shell: false,
-            cwd
+            cwd,
+            windowsHide: true,
+            env: { FORCE_COLOR: "true", }
         });
-        this._process.stdout.setEncoding("utf8");
-        this._process.stderr.setEncoding("utf8");
     }
-
     
     public async result(): Promise<IShellResult> {
         return new Promise((resolve, reject) => {
             const stdout: string[] = [];
             const stderr: string[] = [];
 
-            this._process.stdout.on("data", (data) => {
+            this._process.stdout.on("data", (data: Buffer) => {
                 stdout.push(data.toString());
             });
 
-            this._process.stderr.on("data", (data) => {
+            this._process.stderr.on("data", (data: Buffer) => {
                 stderr.push(data.toString());
             });
 

@@ -73,6 +73,7 @@
     "ini": "^3.0.1",
     "markdown-it": "^13.0.1",
     "path": "^0.12.7",
+    "stream": "^0.0.2",
     "util": "^0.12.5"
   },
   "license": "MIT"

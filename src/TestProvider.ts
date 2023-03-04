@@ -16,9 +16,8 @@ import {
     Position,
     Range
 } from "vscode";
-import * as path from "path";
 import { PyTestConfig } from "./PyTestConfig";
-import { PyTestFile } from "./PyTestFile";
+import { PyTestFile, IPyTestResult } from "./PyTestFile";
 
 export class TestProvider {
     
@@ -182,8 +181,7 @@ export class TestProvider {
         run.started(test);
 
         const result = await file.run(shouldDebug);
-        const location = new Location(test.uri!, new Position(0, 0));
-        run.appendOutput(result.message, location, test);
+        this.appendOutputTestitemResult(run, test, result);
 
         switch (result.status) {
             case "passed":
@@ -193,6 +191,37 @@ export class TestProvider {
                 run.failed(test, [], result.duration);
                 break;
         }
+    }
+
+    private getTestItemFullLabel(testItem: TestItem): string {
+        const label = testItem.label;
+        const parent = testItem.parent;
+        if (parent && parent.label.match(/\d+-[\w-]+/)) {
+            return this.getTestItemFullLabel(parent) + " > " + label;
+        }
+        return label;
+    }
+
+    private appendOutputSeperator(run: TestRun): void {
+        run.appendOutput("\r\n");
+        run.appendOutput(`\u001b[35m${"=".repeat(90)}\u001b[0m\r\n`);
+    }
+
+    private appendOutputTestitemResult(run: TestRun, testItem: TestItem, result: IPyTestResult): void {
+        const location = new Location(testItem.uri!, new Position(0, 80)); // TODO maybe interpret the output and find the line number.
+        this.appendOutputSeperator(run);
+
+        const label = this.getTestItemFullLabel(testItem);
+        run.appendOutput(`\u001b[35m| [${label}]:\u001b[0m\r\n`);
+
+        run.appendOutput(result.message
+            .split("\n")
+            .map(line => `\u001b[35m|\u001b[0m \t${line}`)
+            .join("\n")
+        , location, testItem);
+
+        // run.appendOutput(this.formatMessage(result.message, testItem), location, testItem);
+        this.appendOutputSeperator(run);
     }
 
     public getRunProfile(): TestRunProfile {

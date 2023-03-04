@@ -5,7 +5,7 @@ import { PyTestResult } from "./PyTestResult";
 
 type PyTestStatus = "passed" | "failed";
 
-interface IPyTestResult {
+export interface IPyTestResult {
     readonly status: PyTestStatus;
     readonly message: string;
     readonly duration?: number;
