@@ -17,7 +17,6 @@ export class PyTestFile {
 
     constructor(uri: Uri) {
         this._folder = path.dirname(uri.fsPath);
-        console.log(this._folder);
     }
 
     public async run(shouldDebug: boolean): Promise<IPyTestResult> {
