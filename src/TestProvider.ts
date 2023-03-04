@@ -16,7 +16,7 @@ import {
     Position,
     Range
 } from "vscode";
-import * as path from "node:path";
+import * as path from "path";
 import { PyTestConfig } from "./PyTestConfig";
 import { PyTestFile } from "./PyTestFile";
 
@@ -91,28 +91,28 @@ export class TestProvider {
 
         const controller = this._controller;
 
-        const relPath = path.relative(testItem.uri.fsPath, uri.fsPath);
+        const relPath = uri.fsPath.slice(testItem.uri.fsPath.length + 1);
 
         function helper(paths: string[], testItem: TestItem): TestItem {
             if (paths.length === 0) {
                 return testItem;
             }
 
-            const path = paths.shift();
+            const section = paths.shift();
             const isNextFile = paths?.[0]?.endsWith(".py");
 
-            if (!path) {
+            if (!section) {
                 throw new Error("Unexpected Error: path is empty");
-            } else if (path.endsWith(".py")) {
+            } else if (section.endsWith(".py")) {
                 return testItem;
             }
 
-            const existing = testItem.children.get(path);
+            const existing = testItem.children.get(section);
             if (existing) {
                 return helper(paths, existing);
             }
 
-            const item = controller.createTestItem(path, path, isNextFile ? uri : undefined);
+            const item = controller.createTestItem(section, section, isNextFile ? uri : undefined);
             item.range = isNextFile ? new Range(new Position(0, 0), new Position(0, 0)) : undefined;
 
             testItem.children.add(item);
@@ -120,7 +120,7 @@ export class TestProvider {
             return helper(paths, item);
         }
 
-        return helper(relPath.split(path.sep), testItem);
+        return helper(relPath.split("\\"), testItem);
     }
 
     private getType(testItem: TestItem): "file" | "folder" | "unknown" {
