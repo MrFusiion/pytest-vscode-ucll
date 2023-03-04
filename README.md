@@ -7,7 +7,7 @@
 
 Extension which adds extra features that helps with `UCLL Prorgramming-2 exercises`.
 
-![Preview](./images/preview.png).
+![Preview](./images/preview_test_items.png).
 
 <hr>
 
