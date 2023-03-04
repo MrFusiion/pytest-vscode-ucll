@@ -1,4 +1,4 @@
-import { commands, Uri, window, ViewColumn, workspace, Extension, extensions, WebviewPanel, Webview, ExtensionContext } from "vscode";
+import { Uri, ExtensionContext } from "vscode";
 import * as path from "path";
 import { Disposable } from "./util/Disposable";
 import { MarkdownPreviewManager } from "./markdown/MarkdownPreviewManager";
