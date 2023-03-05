@@ -52,7 +52,12 @@ export class PyTestFile {
         } else {
             return {
                 status: "failed",
-                message: "Unknown error notify the developer of the extension."
+                message: [
+                    "\u001b[31mUnknown error notify the developer of the extension.\u001b[0m",
+                    `didFail: ${result.didFail}, didPass: ${result.didPass}`,
+                    `passed: ${result.passed}, failed: ${result.failed}, skipped: ${result.skipped}, errored: ${result.errored}`,
+                    `stdout: ${stdout}`
+                ].join("\r\n")
             };
         }
     }

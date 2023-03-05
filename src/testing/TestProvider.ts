@@ -62,6 +62,7 @@ export class TestProvider extends Disposable {
         this._run = this._controller.createTestRun(request);
         const output = new TestOutput(this._run);
         const queue: TestItem[] = [];
+        const promises: Promise<any>[] = [];
 
         const testWorkerManager = new TestWorkerManager();
 
@@ -88,27 +89,30 @@ export class TestProvider extends Disposable {
                     if (testWorkerManager.busy) {
                         await testWorkerManager.waitForWorker();
                     }
-                    this._run.enqueued(test);
-                    testWorkerManager.runTestItem(test, shouldDebug)
-                        .then(result => {
-                            switch (result.status) {
-                                case "passed":
-                                    this._run?.passed(test, result.duration);
-                                    break;
-                                case "failed":
-                                    this._run?.failed(test, [], result.duration);
-                                    break;
-                            }
-                            output.appendTestItemResult(test, result);
-                        });
+                    this._run?.enqueued(test)
+                    promises.push(
+                        testWorkerManager.runTestItem(test, shouldDebug)
+                            .then(result => {
+                                switch (result.status) {
+                                    case "passed":
+                                        this._run?.passed(test, result.duration);
+                                        break;
+                                    case "failed":
+                                        this._run?.failed(test, [], result.duration);
+                                        break;
+                                }
+                                output.appendTestItemResult(test, result);
+                            })
+                            .catch(console.error)
+                    );
                     break;
                 case "unknown":
                     throw new Error("Unexpected Error: TestItem has no uri");
             }
         }
 
-        if (testWorkerManager.isWorking && !token.isCancellationRequested) {
-            await testWorkerManager.waitForAllWorkers();
+        if (!token.isCancellationRequested) {
+            await Promise.all(promises);
         }
 
         this._run?.end();
