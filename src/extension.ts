@@ -28,7 +28,7 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
-	const testProvider = new TestProvider();
+	const testProvider = new TestProvider(context);
 
 	context.subscriptions.push(testProvider);
 	context.subscriptions.push(assignmentManager);

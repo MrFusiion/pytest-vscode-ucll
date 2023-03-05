@@ -1,11 +1,13 @@
-import { Configuration } from "./Configuration";
-
 const PASSED_REGEX = /(\d+) passed/;
 const SKIPPED_REGEX = /(\d+) skipped/;
 const FAILED_REGEX = /(\d+) failed/;
 const ERROR_REGEX = /(\d+) error/;
 const TIME_REGEX = /(\d+\.\d+)s/;
 const SUMMARY_REGEX = /=+\sshort test summary info\s=+/;
+
+export interface IPyTestResultOptions {
+    readonly showOnlyResultSummary: boolean;
+}
 
 export class PyTestResult {
 
@@ -17,11 +19,11 @@ export class PyTestResult {
     private _failed: number;
     private _errored: number;
 
-    constructor(stdout: string) {
+    constructor(stdout: string, options: IPyTestResultOptions) {
 
         let lines = stdout.split("\n");
 
-        if (Configuration.getValue("vscode.pytest.ucll.showOnlyResultSummary")) {
+        if (options.showOnlyResultSummary) {
             while (lines.length > 0) {
                 const line = lines.shift() || "";
                 if (line.match(SUMMARY_REGEX)) {

@@ -7,10 +7,12 @@ const webpack = require("webpack");
 const config = {
     target: "webworker",
 
-    entry: "./src/extension.ts",
+    entry: {
+        extension: "./src/extension.ts",
+        test_thread: "./src/testing/test_thread.ts"
+    },
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "extension.js",
         libraryTarget: "commonjs2",
         devtoolModuleFilenameTemplate: "../[resource-path]"
     },
@@ -18,6 +20,8 @@ const config = {
     externals: {
         vscode: "commonjs vscode",
         child_process: "commonjs child_process",
+        worker_threads: "commonjs worker_threads",
+        os: "commonjs os",
     },
     resolve: {
         mainFields: ["browser", "module", "main"],

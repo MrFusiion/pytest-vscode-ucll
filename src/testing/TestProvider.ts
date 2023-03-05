@@ -1,12 +1,13 @@
 import {
     tests,
+    TestRun,
     TestItem,
     TestController,
     TestRunProfile,
     TestRunProfileKind,
     TestRunRequest,
     CancellationToken,
-    TestRun,
+    ExtensionContext,
     window
 } from "vscode";
 import { TestFinder } from "./TestFinder";
@@ -16,14 +17,16 @@ import { TestWorkerManager } from "./TestWorkerManager";
 
 export class TestProvider extends Disposable {
     
+    private _context: ExtensionContext;
     private _controller: TestController;
     private _runProfile: TestRunProfile;
     private _debugProfile: TestRunProfile;
     private _run?: TestRun;
 
-    public constructor() {
+    public constructor(context: ExtensionContext) {
         super();
 
+        this._context = context;
         this._controller = this._register(tests.createTestController("pytest-vscode-ucll", "PyTest Programming-2"));
 
         const testFinder = new TestFinder(this._controller);
@@ -64,7 +67,7 @@ export class TestProvider extends Disposable {
         const queue: TestItem[] = [];
         const promises: Promise<any>[] = [];
 
-        const testWorkerManager = new TestWorkerManager();
+        const testWorkerManager = new TestWorkerManager(this._context);
 
         if (request.include) {
             request.include.forEach(item => queue.push(item));

@@ -1,4 +1,3 @@
-import { Uri } from "vscode";
 import * as path from "path";
 import { Shell } from "./Shell";
 import { PyTestResult } from "./PyTestResult";
@@ -11,19 +10,23 @@ export interface IPyTestResult {
     readonly duration?: number;
 }
 
+export interface IPyTestFileOptions {
+    readonly showOnlyResultSummary: boolean;
+}
+
 export class PyTestFile {
 
     private readonly _folder: string;
 
-    constructor(uri: Uri) {
-        this._folder = path.dirname(uri.fsPath);
+    constructor(fsPath: string) {
+        this._folder = path.dirname(fsPath);
     }
 
-    public async run(shouldDebug: boolean): Promise<IPyTestResult> {
+    public async run(shouldDebug: boolean, options: IPyTestFileOptions): Promise<IPyTestResult> {
         const shell = new Shell("pytest", this._folder);
         try {
             const result = await shell.result();
-            return this.parseResult(result.stdout);
+            return this.parseResult(result.stdout, options.showOnlyResultSummary);
         }
         catch (error: any) {
             return {
@@ -33,9 +36,11 @@ export class PyTestFile {
         }
     }
 
-    private parseResult(stdout: string): IPyTestResult {
+    private parseResult(stdout: string, showOnlyResultSummary: boolean): IPyTestResult {
         
-        const result = new PyTestResult(stdout);
+        const result = new PyTestResult(stdout, {
+            showOnlyResultSummary
+        });
 
         if (result.didFail) {
             return {
@@ -60,13 +65,6 @@ export class PyTestFile {
                 ].join("\r\n")
             };
         }
-    }
-
-    public get studentFile(): Uri {
-        return Uri.from({
-            scheme: "file",
-            path: path.resolve(this._folder, "student.py")
-        });
     }
 
 }

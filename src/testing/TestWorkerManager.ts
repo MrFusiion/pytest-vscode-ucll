@@ -1,8 +1,9 @@
-import { TestRun, TestItem, EventEmitter } from "vscode";
+import { TestItem, EventEmitter, ExtensionContext } from "vscode";
 import { Disposable } from "../util/Disposable";
 import { TestWorker } from "./TestWorker";
 import { IPyTestResult } from "../PyTestFile";
 import { Configuration } from "../Configuration";
+import { cpus } from "os";
 
 export class NoAvailableWorkersError extends Error {};
 
@@ -20,12 +21,12 @@ export class TestWorkerManager extends Disposable {
 
     public readonly onDidWorkerCompleteTestItem = this._onDidWorkerCompleteTestItem.event;
 
-    constructor() {
+    constructor(context: ExtensionContext) {
         super();
 
         this._workers = [];
         for (let i = 0; i < this.maxWorkers; i++) {
-            const worker = new TestWorker();
+            const worker = new TestWorker(context);
             this._register(worker.onDidCompleteTestItem((e) => {
                 this._onDidWorkerCompleteTestItem.fire({
                     worker: worker,
@@ -74,6 +75,8 @@ export class TestWorkerManager extends Disposable {
     }
 
     public get maxWorkers(): number {
-        return Configuration.getValue("vscode.pytest.ucll.totalTestWorkers") || 5;
+        const cores = Math.floor(cpus().length / 2);
+        const want = Configuration.getValue<number>("vscode.pytest.ucll.totalTestWorkers") || 5;
+        return Math.max(1, Math.min(cores, want));
     }
 }
