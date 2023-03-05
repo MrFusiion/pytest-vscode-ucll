@@ -57,7 +57,6 @@ export class TestWorkerManager extends Disposable {
     public async waitForAllWorkers() {
         return new Promise<void>(resolve => {
             const disposable = this.onDidWorkerCompleteTestItem(() => {
-                console.log("Worker completed test item: ", this.busy);
                 if (!this.busy) {
                     resolve();
                     disposable.dispose();
