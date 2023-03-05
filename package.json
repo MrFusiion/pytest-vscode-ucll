@@ -29,6 +29,13 @@
             "type": "boolean",
             "default": false,
             "description": "Show only the test result summary in the test output window."
+          },
+          "vscode.pytest.ucll.totalTestWorkers": {
+            "type": "number",
+            "default": 5,
+            "maximum": 10,
+            "minimum": 1,
+            "description": "Number of test workers to run in parallel."
           }
         }
       }
