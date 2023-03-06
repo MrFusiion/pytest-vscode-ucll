@@ -32,7 +32,7 @@
           },
           "vscode.pytest.ucll.totalTestWorkers": {
             "type": "number",
-            "default": 3,
+            "default": 1,
             "minimum": 1,
             "description": "Number of test workers to run in parallel."
           }

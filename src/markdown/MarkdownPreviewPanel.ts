@@ -50,12 +50,12 @@ export class MarkdownPreviewPanel extends Disposable {
         return this.panel.onDidDispose(listener);
     }
 
-    public dispose() {
-        super.dispose();
-    }
-
     public show() {
         this.panel.reveal();
+    }
+
+    public get viewColumn(): ViewColumn | undefined {
+        return this.panel.viewColumn;
     }
 
     public get isVisible() {

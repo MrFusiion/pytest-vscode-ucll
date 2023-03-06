@@ -13,7 +13,7 @@ export function activate(context: ExtensionContext) {
 
 	const assignmentManager = new AssignmentManager(context);
 
-	window.onDidChangeActiveTextEditor(editor => {
+	window.onDidChangeActiveTextEditor(async editor => {
 		const document = editor?.document;
 		if (!document) {
 			return;
@@ -24,7 +24,10 @@ export function activate(context: ExtensionContext) {
 			if (!Configuration.getValue<boolean>("vscode.pytest.ucll.autoOpenAssignments")) {
 				return;
 			}
-			assignmentManager.open(path.dirname(fileName));
+			const assignment = await assignmentManager.open(path.dirname(fileName));
+			if (assignment && assignment.viewColumn != editor.viewColumn) {
+				assignment.show();
+			}
 		}
 	});
 

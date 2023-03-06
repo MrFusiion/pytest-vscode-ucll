@@ -36,12 +36,12 @@ export class MarkdownPreviewManager extends Disposable {
     public getMarkdownPanel(resource: Uri, options?: IMarkdownPreviewPanelOptions): MarkdownPreviewPanel {
         const panel = this.getExistingMarkdownPanel(resource);
         if (panel) {
-            if (!panel.isVisible) {
-                panel.show();
-            }
+            // if (!panel.isVisible) {
+            //     panel.show();
+            // }
             return panel;
         }
-        return this.createMarkdownPanel(resource, options);
+        return this._register(this.createMarkdownPanel(resource, options));
     }
 
     public getExistingMarkdownPanel(resource: Uri): MarkdownPreviewPanel | undefined {

@@ -26,11 +26,11 @@ export class AssignmentManager extends Disposable {
             const pattern = new RelativePattern(folder, name);
             const files = await workspace.findFiles(pattern);
             if (files.length > 0) {
-                return this._register(this._markdownPreviewManager.getMarkdownPanel(files[0], {
+                return this._markdownPreviewManager.getMarkdownPanel(files[0], {
                     name: `Assignment: ${path.basename(folder)}`,
                     iconPath: Uri.file(path.join(this._context.extensionPath, "images", "logo.png")),
                     ...options
-                }));
+                });
             }
         }
         return null;
