@@ -52,6 +52,15 @@ export class TestWorkerManager extends Disposable {
         return "unknown";
     }
 
+    public registerTestItems(tests: TestItem[], exclude: readonly TestItem[]): void {
+        tests = [...tests].sort((a, b) => {
+            return a.sortText?.localeCompare(b.sortText ?? "") ?? 0;
+        });
+        for (const test of tests) {
+            this.registerTestItem(test, exclude);
+        }
+    }
+
     public registerTestItem(test: TestItem, exclude: readonly TestItem[]): void {
         if (exclude.includes(test)) {
             return;
@@ -66,9 +75,7 @@ export class TestWorkerManager extends Disposable {
                 });
                 break;
             case "folder":
-                for (const [_, child] of test.children) {
-                    this.registerTestItem(child, exclude);
-                }
+                this.registerTestItems([...test.children].map(([_, item]) => item), exclude);
                 break;
             case "unknown":
                 throw new Error("Test item does not have a uri or children");

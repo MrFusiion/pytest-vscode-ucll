@@ -56,11 +56,11 @@ export class TestProvider extends Disposable {
 
         const testWorkerManager = janitor.register(new TestWorkerManager(this._context));
 
-        janitor.register(testWorkerManager.onDidQueueTestItem(e => {
-            if (e.test) {
-                run.enqueued(e.test);
-            }
-        }));
+        // janitor.register(testWorkerManager.onDidQueueTestItem(e => {
+        //     if (e.test) {
+        //         run.enqueued(e.test);
+        //     }
+        // }));
 
         janitor.register(testWorkerManager.onDidWorkerStartTestItem(e => {
             if (e.test) {
@@ -90,13 +90,7 @@ export class TestProvider extends Disposable {
                 .forEach(test => include.push(test));
         }
 
-        while (include.length > 0 && !token.isCancellationRequested) {
-            const test = include.pop()!;
-            if (!test) {
-                break;
-            }
-            testWorkerManager.registerTestItem(test, request.exclude ?? []);
-        }
+        testWorkerManager.registerTestItems(include, request.exclude ?? [])
 
         try {
             await testWorkerManager.runTests(shouldDebug, token);

@@ -20,7 +20,12 @@ export class TestFinder extends Disposable {
         await Promise.all(
             workspace.workspaceFolders.map(async folder => {
 
-                const item = this._controller.createTestItem(folder.name, folder.name, folder.uri);
+                const item = this._controller.createTestItem(
+                    folder.name,
+                    `$(globe) ${folder.name}`,
+                    folder.uri
+                );
+                item.sortText = folder.name;
 
                 this._controller.items.add(item);
 
@@ -79,7 +84,12 @@ export class TestFinder extends Disposable {
                 return helper(paths, existing);
             }
 
-            const item = controller.createTestItem(section, section, isNextFile ? uri : undefined);
+            const item = controller.createTestItem(
+                section,
+                `${isNextFile ? "$(file)" : "$(folder)"} ${section}`,
+                isNextFile ? uri : undefined
+            );
+            item.sortText = section;
             item.range = isNextFile ? new Range(new Position(0, 0), new Position(0, 0)) : undefined;
 
             testItem.children.add(item);

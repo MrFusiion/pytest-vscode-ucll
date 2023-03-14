@@ -26,7 +26,7 @@ export class TestOutput {
     }
 
     private getTestItemFullLabel(testItem: TestItem): string {
-        const label = testItem.label;
+        const label = testItem.sortText || testItem.label;
         const parent = testItem.parent;
         if (parent && parent.label.match(/\d+-[\w-]+/)) {
             return this.getTestItemFullLabel(parent) + " > " + label;
