@@ -3,7 +3,8 @@ import { IPyTestXmlResultTestCase, IPyTestXmlResultTestCaseMessage } from "./PyT
 
 const ERROR_REGEX = /[\w]+\.py:(\d+): (\w+)/;
 const ASSERT_ERROR = /assert (.+) == (.+)/;
-const ESCAPE_REGEX = /#x1B\[\d+(?:;\d+)?m|&#10/g;
+const ASCII_ESCAPE_REGEX = /#x1B\[\d+(?:;\d+)?m/g;
+const NEWLINE_REGEX = /&#10/g;
 
 export interface ErrorObject {
     readonly kind: string;
@@ -34,7 +35,9 @@ export class PyTestResultError {
     }
 
     private parseText(text: string): string {
-        return text.replace(ESCAPE_REGEX, "");
+        return text
+            .replace(ASCII_ESCAPE_REGEX, "")
+            .replace(NEWLINE_REGEX, "\n");
     }
 
     public getLocation(uri: Uri): Location {
