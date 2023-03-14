@@ -46,6 +46,9 @@ When you open a `student.py` file, the assignment.md file should open automatica
 ### If everything works properly, the tests.py file should open and display the error that occurred.
 ![Failed Test Ouput](/images/failed_test_output.png)
 
+### Expected vs Actual errors which display some errors more clearly.
+![Actual VS Expected Error](/images/actual_vs_expected_error.png)
+
 ### If you encounter an error message like the one shown below, it means that pytest is not installed on your system.
 ### Refer to the [installation guide](https://ucll-pr2.github.io/exercises/installation/python-packages.html) provided by your instructor to install any necessary extra packages.
 ![Failed Test Ouput No Pytest](/images/failed_test_ouput_no_pytest.png)

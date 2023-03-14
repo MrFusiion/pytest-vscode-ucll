@@ -82,6 +82,10 @@ export class PyTestXmlResultParser extends XMLParser {
             .map((testcase) => PyTestResultError.fromTestCase(testcase))
             .filter((error) => error !== undefined) as PyTestResultError[];
 
+        const didFail = failed > 0 || skipped > 0;
+        const didError = errored > 0;
+        const didPass = !didFail && !didError && passed > 0;
+
         return {
             failed,
             skipped,
@@ -91,9 +95,9 @@ export class PyTestXmlResultParser extends XMLParser {
             duration,
             message: result.stderr || result.stdout,
             errors,
-            didFail: failed > 0 || skipped > 0,
-            didError: errored > 0,
-            didPass: passed > 0
+            didFail,
+            didError,
+            didPass
         }
     }
 
