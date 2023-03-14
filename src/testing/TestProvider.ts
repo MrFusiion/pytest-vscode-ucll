@@ -1,6 +1,5 @@
 import {
     tests,
-    TestRun,
     TestItem,
     TestController,
     TestRunProfile,
@@ -14,6 +13,7 @@ import { TestFinder } from "./TestFinder";
 import { Disposable } from "../util/Disposable";
 import { TestOutput } from "./TestOuput";
 import { TestWorkerManager } from "./TestWorkerManager";
+import Janitor from "../util/Janitor";
 
 export class TestProvider extends Disposable {
     
@@ -21,7 +21,6 @@ export class TestProvider extends Disposable {
     private _controller: TestController;
     private _runProfile: TestRunProfile;
     private _debugProfile: TestRunProfile;
-    private _run?: TestRun;
 
     public constructor(context: ExtensionContext) {
         super();
@@ -46,80 +45,68 @@ export class TestProvider extends Disposable {
         });
     }
  
-    private getType(testItem: TestItem): "file" | "folder" | "unknown" {
-        if (testItem.children.size > 0) {
-            return "folder";
-        } else if (testItem.uri) {
-            return "file";
-        }
-        return "unknown";
-    }
-
     private async runTests(shouldDebug: boolean, request: TestRunRequest, token: CancellationToken): Promise<void> {
 
-        if (this._run) {
-            window.showErrorMessage("A test run is already in progress");
-            return;
-        }
+        const run = this._controller.createTestRun(request);
+        const output = new TestOutput(run);
 
-        this._run = this._controller.createTestRun(request);
-        const output = new TestOutput(this._run);
-        const queue: TestItem[] = [];
-        const promises: Promise<any>[] = [];
+        const janitor = new Janitor(() => {
+            run.end();
+        });
 
-        const testWorkerManager = new TestWorkerManager(this._context);
+        const testWorkerManager = janitor.register(new TestWorkerManager(this._context));
 
+        janitor.register(testWorkerManager.onDidQueueTestItem(e => {
+            if (e.test) {
+                run.enqueued(e.test);
+            }
+        }));
+
+        janitor.register(testWorkerManager.onDidWorkerStartTestItem(e => {
+            if (e.test) {
+                run.started(e.test);
+            }
+        }));
+
+        janitor.register(testWorkerManager.onDidWorkerCompleteTestItem(e => {
+            if (e.test) {
+                const result = e.result;
+                if (result.didPass) {
+                    run.passed(e.test, e.result.duration);
+                } else if (result.didFail) {
+                    run.failed(e.test, result.errors.map(error => error.getTestMessage(e.test.uri!)), e.result.duration);
+                } else if (result.didError) {
+                    run.errored(e.test, result.errors.map(error => error.getTestMessage(e.test.uri!)), e.result.duration);
+                }
+                output.appendTestItemResult(e.test, e.result);
+            }
+        }));
+
+        const include: TestItem[] = [];
         if (request.include) {
-            request.include.forEach(item => queue.push(item));
+            include.push(...request.include);
         } else {
-            this._controller.items.forEach(item => queue.push(item));
+            this._controller.items
+                .forEach(test => include.push(test));
         }
 
-        while (queue.length > 0 && !token.isCancellationRequested) {
-            const test = queue.pop()!;
-
-            if (request.exclude?.includes(test)) {
-                continue;
+        while (include.length > 0 && !token.isCancellationRequested) {
+            const test = include.pop()!;
+            if (!test) {
+                break;
             }
-
-            switch (this.getType(test)) {
-                case "folder":
-                    Array.from(test.children)
-                        .sort(([a], [b]) => a.localeCompare(b) * -1)
-                        .forEach(([_, test]) => queue.push(test));
-                    break;
-                case "file":
-                    if (testWorkerManager.busy) {
-                        await testWorkerManager.waitForWorker();
-                    }
-                    this._run?.enqueued(test)
-                    promises.push(
-                        testWorkerManager.runTestItem(test, shouldDebug)
-                            .then(result => {
-                                switch (result.status) {
-                                    case "passed":
-                                        this._run?.passed(test, result.duration);
-                                        break;
-                                    case "failed":
-                                        this._run?.failed(test, [], result.duration);
-                                        break;
-                                }
-                                output.appendTestItemResult(test, result);
-                            })
-                            .catch(console.error)
-                    );
-                    break;
-                case "unknown":
-                    throw new Error("Unexpected Error: TestItem has no uri");
-            }
+            testWorkerManager.registerTestItem(test, request.exclude ?? []);
         }
 
-        if (!token.isCancellationRequested) {
-            await Promise.all(promises);
+        try {
+            await testWorkerManager.runTests(shouldDebug, token);
         }
-
-        this._run?.end();
-        this._run = undefined;
+        catch (e: any) {
+            window.showErrorMessage(e.message);
+        }
+        finally {
+            janitor.dispose();
+        }
     }
 
     public getRunProfile(): TestRunProfile {

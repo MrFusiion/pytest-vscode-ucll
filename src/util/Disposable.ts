@@ -32,7 +32,7 @@ export abstract class Disposable implements Disposable {
         return value;
     }
 
-    protected get isDisposed() {
+    public get isDisposed() {
         return this._isDisposed;
     }
 

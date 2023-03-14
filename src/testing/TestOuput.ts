@@ -1,5 +1,5 @@
 import { TestItem, TestRun, Position, Location } from "vscode";
-import { IPyTestResult } from "../PyTestFile";
+import { IPyTestResult } from "../pytest/PyTestXmlResultParser";
 
 export class TestOutput {
 

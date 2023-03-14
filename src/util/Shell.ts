@@ -6,16 +6,37 @@ export interface IShellResult {
     readonly code: number | null;
 }
 
+export interface IShellOptions {
+    readonly cwd?: string;
+    readonly env?: NodeJS.ProcessEnv;
+    readonly shell?: boolean;
+}
+
 export class Shell {
 
     private _process: ChildProcessWithoutNullStreams;
 
-    constructor(cmd: string, cwd?: string) {
-        this._process = spawn(cmd, {
-            shell: false,
-            cwd,
+    constructor(cmd: string, options?: IShellOptions);
+    constructor(cmd: string, args?: string[], options?: IShellOptions)
+    constructor(...args: any[]) {
+        let [cmd, cmdArgs, options] = args;
+        
+        if (typeof cmdArgs === "object" && !Array.isArray(cmdArgs)) {
+            options = cmdArgs;
+            cmdArgs = [];
+        }
+
+        options = options || {};
+        options.env = options.env || {};
+
+        this._process = spawn(cmd, cmdArgs, {
+            shell: options.shell ?? false,
+            cwd: options?.cwd,
             windowsHide: true,
-            env: { FORCE_COLOR: "true", }
+            env: {
+                ...options.env,
+                FORCE_COLOR: "true"
+            }
         });
     }
     

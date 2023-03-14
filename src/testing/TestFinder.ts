@@ -1,6 +1,6 @@
 import { WorkspaceFolder, TestItem, TestController, RelativePattern, Uri, Range, Position, workspace } from "vscode";
 import { Disposable } from "../util/Disposable";
-import { PyTestConfig } from "../PyTestConfig";
+import { PyTestConfig } from "../pytest/PyTestConfig";
 
 export class TestFinder extends Disposable {
 

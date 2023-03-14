@@ -1,7 +1,7 @@
-import { TestItem, EventEmitter, ExtensionContext } from "vscode";
+import { TestItem, EventEmitter, ExtensionContext, TestRun, CancellationToken } from "vscode";
 import { Disposable } from "../util/Disposable";
 import { TestWorker } from "./TestWorker";
-import { IPyTestResult } from "../PyTestFile";
+import { IPyTestResult } from "../pytest/PyTestXmlResultParser";
 import { Configuration } from "../Configuration";
 import { cpus } from "os";
 
@@ -13,49 +13,128 @@ export interface IWorkerCompleteTestItemEvent {
     result: IPyTestResult;
 }
 
+export interface IWorkerTestItemEvent {
+    worker: TestWorker;
+    test: TestItem;
+}
+
 export class TestWorkerManager extends Disposable {
 
     private _workers: TestWorker[] = [];
+    private _queue: TestItem[] = [];
+    private _run?: { token: CancellationToken, debug: boolean };
 
     private readonly _onDidWorkerCompleteTestItem = this._register(new EventEmitter<IWorkerCompleteTestItemEvent>());
+    private readonly _ondidWorkerStartTestItem = this._register(new EventEmitter<IWorkerTestItemEvent>());
+    private readonly _onDidQueueTestItem = this._register(new EventEmitter<IWorkerTestItemEvent>());
 
     public readonly onDidWorkerCompleteTestItem = this._onDidWorkerCompleteTestItem.event;
+    public readonly onDidWorkerStartTestItem = this._ondidWorkerStartTestItem.event;
+    public readonly onDidQueueTestItem = this._onDidQueueTestItem.event;
 
     constructor(context: ExtensionContext) {
         super();
 
         this._workers = [];
+        this._queue = [];
+
         for (let i = 0; i < this.maxWorkers; i++) {
-            const worker = new TestWorker(context);
-            this._register(worker.onDidCompleteTestItem((e) => {
-                this._onDidWorkerCompleteTestItem.fire({
-                    worker: worker,
-                    test: e.test,
-                    result: e.result
+            this._workers.push(this._register(new TestWorker(context)));
+        }
+    }
+
+    private getType(testItem: TestItem): "file" | "folder" | "unknown" {
+        if (testItem.children.size > 0) {
+            return "folder";
+        } else if (testItem.uri) {
+            return "file";
+        }
+        return "unknown";
+    }
+
+    public registerTestItem(test: TestItem, exclude: readonly TestItem[]): void {
+        if (exclude.includes(test)) {
+            return;
+        }
+
+        switch (this.getType(test)) {
+            case "file":
+                this._queue.push(test);
+                this._onDidQueueTestItem.fire({
+                    worker: this._workers[0],
+                    test: test
                 });
-            }));
-            this._workers.push(worker);
+                break;
+            case "folder":
+                for (const [_, child] of test.children) {
+                    this.registerTestItem(child, exclude);
+                }
+                break;
+            case "unknown":
+                throw new Error("Test item does not have a uri or children");
         }
     }
 
-    public async runTestItem(test: TestItem, shouldDebug: boolean): Promise<IPyTestResult> {
-        let worker = this._workers.find(w => !w.busy);
-        if (!worker) {
-            throw new NoAvailableWorkersError();
+    private async _runTests() {
+        if (!this._run) {
+            throw new Error("No run");
         }
-        return await worker.runTestItem(test, shouldDebug);
+
+        while (this._queue.length > 0 && !this._run.token.isCancellationRequested) {
+            const test = this._queue.shift();
+            if (!test) {
+                break;
+            }
+
+            const worker = await this.getWorker();
+            
+            this._ondidWorkerStartTestItem.fire({
+                worker: worker,
+                test: test
+            });
+
+            const result = await worker.runTest(test, this._run.debug);
+
+            this._onDidWorkerCompleteTestItem.fire({
+                worker: worker,
+                test: test,
+                result: result
+            });
+        }
     }
 
-    public async waitForWorker() {
-        return new Promise<void>(resolve => {
-            const disposable = this.onDidWorkerCompleteTestItem(() => {
-                resolve();
+    public async runTests(shouldDebug: boolean, token: CancellationToken): Promise<void> {
+        if (this._run) {
+            throw new Error("Already running");
+        }
+
+        let result: any | undefined;
+        try {
+            this._run = { token, debug: shouldDebug };
+            result = await this._runTests();
+        }
+        finally {
+            this._run = undefined;
+            this._queue = [];
+        }
+        return result;
+    }
+
+    private async getWorker(): Promise<TestWorker> {
+        return this._workers.find(w => !w.busy)
+            || await this.waitForWorker();
+    }
+
+    private async waitForWorker(): Promise<TestWorker> {
+        return new Promise<TestWorker>(resolve => {
+            const disposable = this.onDidWorkerCompleteTestItem((e) => {
+                resolve(e.worker);
                 disposable.dispose();
             });
         });
     }
 
-    public async waitForAllWorkers() {
+    private async waitForAllWorkers(): Promise<void> {
         return new Promise<void>(resolve => {
             const disposable = this.onDidWorkerCompleteTestItem(() => {
                 if (!this.busy) {
@@ -66,11 +145,11 @@ export class TestWorkerManager extends Disposable {
         });
     }
 
-    public get busy() {
+    public get busy(): boolean {
         return this._workers.every(w => w.busy);
     }
 
-    public get isWorking() {
+    public get isWorking(): boolean {
         return this._workers.some(w => w.busy);
     }
 
