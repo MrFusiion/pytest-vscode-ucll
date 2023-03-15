@@ -63,31 +63,29 @@ export class TestWorker extends Disposable {
         })
     }
 
-    public async runTest(test: TestItem, shouldDebug: boolean): Promise<IPyTestResult> {
+    public async runTest(test: TestItem, shouldDebug: boolean): Promise<void> {
         if (this._testItem) {
             throw new Error("Test worker is busy");
         }
-
-        let result: IPyTestResult | undefined;
+        
         try {
             this._testItem = test;
 
-            result = await this._runTest(shouldDebug);
+            const result = await this._runTest(shouldDebug);
     
+            this._testItem = undefined;
+            
             this._onDidCompleteTestItem.fire({
                 test: test,
                 result: result
             });
         }
         catch (e) {
-            const message = Window.showErrorMessage(e);
-            result = PyTestXmlResultParser.errored(message);
+            Window.showErrorMessage(e);
         }
         finally {
             this._testItem = undefined;
         }
-
-        return result;
     }
     
     public get busy(): boolean {

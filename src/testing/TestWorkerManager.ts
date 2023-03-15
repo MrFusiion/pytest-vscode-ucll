@@ -42,6 +42,7 @@ export class TestWorkerManager extends Disposable {
         for (let i = 0; i < this.maxWorkers; i++) {
             this._workers.push(this._register(new TestWorker(context)));
         }
+        console.log(this._workers);
     }
 
     private getType(testItem: TestItem): "file" | "folder" | "unknown" {
@@ -101,13 +102,26 @@ export class TestWorkerManager extends Disposable {
                 test: test
             });
 
-            const result = await worker.runTest(test, this._run.debug);
-
-            this._onDidWorkerCompleteTestItem.fire({
-                worker: worker,
-                test: test,
-                result: result
+            const disposable = worker.onDidCompleteTestItem((e) => {
+                if (e.test === test) { 
+                    this._onDidWorkerCompleteTestItem.fire({
+                        worker: worker,
+                        test: test,
+                        result: e.result
+                    });
+                    disposable.dispose();
+                }
             });
+
+            worker.runTest(test, this._run.debug);
+        }
+
+        if (this._run.token.isCancellationRequested) {
+            return;
+        }
+
+        if (this.isWorking) {
+            await this.waitForAllWorkers();
         }
     }
 
@@ -139,6 +153,17 @@ export class TestWorkerManager extends Disposable {
             const disposable = this.onDidWorkerCompleteTestItem((e) => {
                 resolve(e.worker);
                 disposable.dispose();
+            });
+        });
+    }
+
+    private async waitForAllWorkers(): Promise<void> {
+        return new Promise<void>(resolve => {
+            const disposable = this.onDidWorkerCompleteTestItem((e) => {
+                if (!this.isWorking) {
+                    resolve();
+                    disposable.dispose();
+                }
             });
         });
     }
