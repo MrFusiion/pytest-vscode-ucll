@@ -18,14 +18,16 @@
       {
         "command": "pytest-vscode-ucll.showAssignment",
         "title": "Pytest VScode UCLL: Show Assignment",
-        "icon": "images/logo.png"
+        "icon": "images/logo.png",
+        "category": "Pytest VScode UCLL",
+        "shortTitle": "Show Assignment"
       }
     ],
     "menus": {
       "explorer/context": [
         {
           "command": "pytest-vscode-ucll.showAssignment",
-          "group": "navigation",
+          "group": "2_workspace",
           "when": "resourceFilename in pytest-vscode-ucll.files"
         }
       ]

@@ -15,6 +15,12 @@ Extension which adds extra features that helps with `UCLL Prorgramming-2 exercis
 When you open a `student.py` file, the assignment.md file should open automatically in preview mode in a splitted window. If you want to change this behavior, you can modify your VS Code settings under the `UCLL Programming 2` section.\
 ![Assignment Setting](./images/setting_auto_open_assigment.png)
 
+Assignments can be opened at anytime by right clicking a `assignment.md`, `student.py`, `tests.py` file in the explorer.
+And clicking on `Pytest VScode UCLL: Show Assignment` to open a assignment.
+![Open Assigment Context Menu](./images/open_assignment_context_menu.png)
+
+Or if you have one of these files open you can use the command pallete Pytest VScode UCLL: Open Assignment` command to open a assignment.
+![Open Assignemt Command Pallete](./images/open_assignemt_command_pallete.png)
 <hr>
 
 ## `Run Tests`
