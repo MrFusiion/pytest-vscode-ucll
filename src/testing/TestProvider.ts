@@ -50,17 +50,9 @@ export class TestProvider extends Disposable {
         const run = this._controller.createTestRun(request);
         const output = new TestOutput(run);
 
-        const janitor = new Janitor(() => {
-            run.end();
-        });
+        const janitor = new Janitor(() => run.end());
 
         const testWorkerManager = janitor.register(new TestWorkerManager(this._context));
-
-        // janitor.register(testWorkerManager.onDidQueueTestItem(e => {
-        //     if (e.test) {
-        //         run.enqueued(e.test);
-        //     }
-        // }));
 
         janitor.register(testWorkerManager.onDidWorkerStartTestItem(e => {
             if (e.test) {
@@ -90,7 +82,7 @@ export class TestProvider extends Disposable {
                 .forEach(test => include.push(test));
         }
 
-        testWorkerManager.registerTestItems(include, request.exclude ?? [])
+        testWorkerManager.registerTestItems(include, request.exclude ?? []);
 
         try {
             await testWorkerManager.runTests(shouldDebug, token);

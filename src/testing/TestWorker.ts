@@ -1,10 +1,10 @@
 import { TestItem, EventEmitter, ExtensionContext, Uri } from "vscode";
 import { Worker } from "worker_threads"
-// import { Configuration } from "../Configuration";
 import { IPyTestResult, PyTestXmlResultParser } from "../pytest/PyTestXmlResultParser";
 import { Disposable } from "../util/Disposable";
 import * as tmp from "tmp";
 import path = require("path");
+import Window from "../util/Window";
 
 export interface ICompleteTestItemEvent {
     test: TestItem;
@@ -78,6 +78,10 @@ export class TestWorker extends Disposable {
                 test: test,
                 result: result
             });
+        }
+        catch (e) {
+            const message = Window.showErrorMessage(e);
+            result = PyTestXmlResultParser.errored(message);
         }
         finally {
             this._testItem = undefined;

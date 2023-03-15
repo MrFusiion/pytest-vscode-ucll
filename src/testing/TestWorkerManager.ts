@@ -1,9 +1,10 @@
-import { TestItem, EventEmitter, ExtensionContext, TestRun, CancellationToken } from "vscode";
+import { TestItem, EventEmitter, ExtensionContext, CancellationToken, window } from "vscode";
 import { Disposable } from "../util/Disposable";
 import { TestWorker } from "./TestWorker";
 import { IPyTestResult } from "../pytest/PyTestXmlResultParser";
 import { Configuration } from "../Configuration";
 import { cpus } from "os";
+import Window from "../util/Window";
 
 export class NoAvailableWorkersError extends Error {};
 
@@ -115,16 +116,17 @@ export class TestWorkerManager extends Disposable {
             throw new Error("Already running");
         }
 
-        let result: any | undefined;
         try {
             this._run = { token, debug: shouldDebug };
-            result = await this._runTests();
+            await this._runTests();
+        }
+        catch (e) {
+            Window.showErrorMessage(e);
         }
         finally {
             this._run = undefined;
             this._queue = [];
         }
-        return result;
     }
 
     private async getWorker(): Promise<TestWorker> {
@@ -137,17 +139,6 @@ export class TestWorkerManager extends Disposable {
             const disposable = this.onDidWorkerCompleteTestItem((e) => {
                 resolve(e.worker);
                 disposable.dispose();
-            });
-        });
-    }
-
-    private async waitForAllWorkers(): Promise<void> {
-        return new Promise<void>(resolve => {
-            const disposable = this.onDidWorkerCompleteTestItem(() => {
-                if (!this.busy) {
-                    resolve();
-                    disposable.dispose();
-                }
             });
         });
     }
