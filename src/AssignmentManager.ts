@@ -3,6 +3,7 @@ import * as path from "path";
 import { Disposable } from "./util/Disposable";
 import { MarkdownPreviewManager } from "./markdown/MarkdownPreviewManager";
 import { IMarkdownPreviewPanelOptions, MarkdownPreviewPanel } from "./markdown/MarkdownPreviewPanel";
+import { file } from "tmp";
 
 const ASSIGMENT_NAMES = [
     "assignment.md",
@@ -22,15 +23,32 @@ export class AssignmentManager extends Disposable {
     }
 
     public async open(folder: string, options?: IMarkdownPreviewPanelOptions): Promise<MarkdownPreviewPanel|null> {
+
+        const assignment = await AssignmentManager.getAssignment(folder);
+        if (!assignment) {
+            return null;
+        }
+
+        return this.openMd(assignment, options);
+    }
+
+    public openMd(file: Uri, options?: IMarkdownPreviewPanelOptions): MarkdownPreviewPanel|null {
+        return this._markdownPreviewManager.getMarkdownPanel(file, {
+            name: `Assignment: ${path.basename(path.dirname(file.fsPath))}`,
+            iconPath: Uri.file(path.join(this._context.extensionPath, "images", "logo.png")),
+            ...options
+        });
+    }
+
+    public static async getAssignment(folder: string): Promise<Uri|null> {
         for (const name of ASSIGMENT_NAMES) {
+            if (name === "*.md") {
+                continue; // don't use the fallback
+            }
             const pattern = new RelativePattern(folder, name);
             const files = await workspace.findFiles(pattern);
             if (files.length > 0) {
-                return this._markdownPreviewManager.getMarkdownPanel(files[0], {
-                    name: `Assignment: ${path.basename(folder)}`,
-                    iconPath: Uri.file(path.join(this._context.extensionPath, "images", "logo.png")),
-                    ...options
-                });
+                return files[0];
             }
         }
         return null;

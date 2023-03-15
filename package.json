@@ -14,6 +14,22 @@
     "workspaceContains:pytest.ini"
   ],
   "contributes": {
+    "commands": [
+      {
+        "command": "pytest-vscode-ucll.showAssignment",
+        "title": "Pytest VScode UCLL: Show Assignment",
+        "icon": "images/logo.png"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "pytest-vscode-ucll.showAssignment",
+          "group": "navigation",
+          "when": "resourceFilename in pytest-vscode-ucll.files"
+        }
+      ]
+    },
     "configuration": [
       {
         "id": "pytest-vscode-ucll",
